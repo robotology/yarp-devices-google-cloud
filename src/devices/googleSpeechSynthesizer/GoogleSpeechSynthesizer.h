@@ -10,8 +10,29 @@
 #include <yarp/dev/ISpeechSynthesizer.h>
 #include <yarp/sig/Sound.h>
 #include <yarp/os/Network.h>
+#include <algorithm>
 
 #include "google/cloud/texttospeech/v1/text_to_speech_client.h"
+
+// Constants
+const std::pair SPEED_RANGE{0.25, 4.0};
+const std::pair PITCH_RANGE{-20.0, 20.0};
+
+/**
+ *  @ingroup dev_impl_other
+ *
+ * \section googleSpeechSynthesizer
+ *
+ * \brief `googleSpeechSynthesizer`: A yarp device for speech synthesis using google cloud cpp libraries
+ *
+ *  Parameters required by this device are:
+ * | Parameter name | SubParameter | Type    | Units          | Default Value | Required | Description                                                                                                                                                   | Notes |
+ * |:--------------:|:------------:|:-------:|:--------------:|:-------------:|:--------:|:-------------------------------------------------------------------------------------------------------------------------------------------------------------:|:-----:|
+ * | language_code  | -            | string  | -              | -             | Yes      | Language for speech synthesis (e.g. "ita", "eng")                                                                                                             |       |
+ * | voice_name     | -            | string  | -              | -             | Yes      | The voice set for speech synthesis. (This page holds the complete list of the available voices: https://cloud.google.com/text-to-speech/docs/voices)          |       |
+ * | voice_speed    | -            | double  | -              | 1.0           | No       | Speaking rate/speed, in the range [0.25, 4.0]. 1.0 is the normal native speed supported by the specific voice. 2.0 is twice as fast, and 0.5 is half as fast. |       |
+ * | voice_pitch    | -            | double  | -              | 0.0           | No       | Speaking pitch, in the range [-20.0, 20.0]. 20 means increase 20 semitones from the original pitch. -20 means decrease 20 semitones from the original pitch.  |       |
+ */
 
 class GoogleSpeechSynthesizer :
         public yarp::dev::DeviceDriver,
@@ -46,11 +67,6 @@ private:
     std::shared_ptr<google::cloud::texttospeech::v1::VoiceSelectionParams> m_synthVoiceSelParams{nullptr};
     std::shared_ptr<google::cloud::texttospeech::v1::Voice>                m_synthVoice{nullptr};
     std::shared_ptr<google::cloud::texttospeech::v1::AudioConfig>          m_synthAudioConfig{nullptr};
-    std::string    m_voiceName;
-    std::string    m_language;
-    double         m_speed;
-    double         m_pitch;
-
 };
 
 #endif // YARP_GOOGLESPEECHSYNTH_H

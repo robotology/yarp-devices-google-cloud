@@ -32,14 +32,49 @@ GoogleSpeechSynthesizer::GoogleSpeechSynthesizer()
 
 bool GoogleSpeechSynthesizer::open(yarp::os::Searchable &config)
 {
+    if(!config.check("language_code"))
+    {
+        yCError(GOOGLESPEECHSYNTH) << "No language code specified";
+
+        return false;
+    }
+    std::string language = config.find("language_code").asString();
+
+    if(!config.check("voice_name"))
+    {
+        yCError(GOOGLESPEECHSYNTH) << "No voice name specified";
+
+        return false;
+    }
+    std::string voiceName = config.find("voice_name").asString();
+
+    double speed = config.check("voice_speed",yarp::os::Value(1.0),"").asFloat64();
+    double pitch = config.check("voice_pitch",yarp::os::Value(0.0),"").asFloat64();
+
     m_synthClient = std::make_shared<texttospeech::TextToSpeechClient>(texttospeech::MakeTextToSpeechConnection());
     m_synthVoiceSelParams = std::make_shared<google::cloud::texttospeech::v1::VoiceSelectionParams>();
     m_synthVoice = std::make_shared<google::cloud::texttospeech::v1::Voice>();
     m_synthInput = std::make_shared<google::cloud::texttospeech::v1::SynthesisInput>();
     m_synthAudioConfig = std::make_shared<google::cloud::texttospeech::v1::AudioConfig>();
 
-    m_synthVoiceSelParams->set_language_code("en-US");
-    m_synthVoiceSelParams->set_name("en-US-Wavenet-C");
+    if(!setVoice(voiceName))
+    {
+        return false;
+    }
+    if(!setLanguage(language))
+    {
+        return false;
+    }
+    if(!setSpeed(speed))
+    {
+       return false;
+    }
+    if(!setPitch(pitch))
+    {
+       return false;
+    }
+
+    yCDebug(GOOGLESPEECHSYNTH) << "Speed:" << m_synthAudioConfig->speaking_rate() << "Pitch:" << m_synthAudioConfig->pitch();
 
     m_synthAudioConfig->set_audio_encoding(google::cloud::texttospeech::v1::MP3);
 
@@ -82,9 +117,9 @@ bool GoogleSpeechSynthesizer::getVoice(std::string& voice_name)
 bool GoogleSpeechSynthesizer::setSpeed(const double speed)
 {
     m_synthAudioConfig->set_speaking_rate(speed);
-    if(m_synthAudioConfig->speaking_rate() != speed)
+    if(speed < SPEED_RANGE.first || speed > SPEED_RANGE.second)
     {
-        yCError(GOOGLESPEECHSYNTH) << "Error while setting the speach rate (speed)";
+        yCError(GOOGLESPEECHSYNTH) << "Error while setting the speach rate (speed). The value is outside the allowed range [" << SPEED_RANGE.first << SPEED_RANGE.second << "]";
         return false;
     }
 
@@ -101,9 +136,9 @@ bool GoogleSpeechSynthesizer::getSpeed(double& speed)
 bool GoogleSpeechSynthesizer::setPitch(const double pitch)
 {
     m_synthAudioConfig->set_pitch(pitch);
-    if(m_synthAudioConfig->pitch() != pitch)
+    if(pitch < PITCH_RANGE.first || pitch > PITCH_RANGE.second)
     {
-        yCError(GOOGLESPEECHSYNTH) << "Error while setting the pitch value";
+        yCError(GOOGLESPEECHSYNTH) << "Error while setting the speach pitch. The value is outside the allowed range [" << PITCH_RANGE.first << PITCH_RANGE.second << "]";
         return false;
     }
 
