@@ -30,6 +30,26 @@ GoogleSpeechSynthesizer::GoogleSpeechSynthesizer()
 
 }
 
+bool GoogleSpeechSynthesizer::_voiceSupported(const std::string& voice_name)
+{
+    if(m_synthVoices.size() == 0)
+    {
+        yCError(GOOGLESPEECHSYNTH) << "You haven't set the language code yet. Voice name cannot be set without a language code";
+    }
+
+    google::protobuf::RepeatedPtrField<google::cloud::texttospeech::v1::Voice>::iterator it;
+    for(it = m_synthVoices.begin(); it != m_synthVoices.end(); it++)
+    {
+        if(it->name() == voice_name)
+        {
+            return true;
+        }
+    }
+
+    yCError(GOOGLESPEECHSYNTH) << "Unsupported voice name";
+    return false;
+}
+
 bool GoogleSpeechSynthesizer::open(yarp::os::Searchable &config)
 {
     if(!config.check("language_code"))
@@ -40,31 +60,27 @@ bool GoogleSpeechSynthesizer::open(yarp::os::Searchable &config)
     }
     std::string language = config.find("language_code").asString();
 
-    if(!config.check("voice_name"))
-    {
-        yCError(GOOGLESPEECHSYNTH) << "No voice name specified";
-
-        return false;
-    }
-    std::string voiceName = config.find("voice_name").asString();
-
     double speed = config.check("voice_speed",yarp::os::Value(1.0),"").asFloat64();
     double pitch = config.check("voice_pitch",yarp::os::Value(0.0),"").asFloat64();
 
     m_synthClient = std::make_shared<texttospeech::TextToSpeechClient>(texttospeech::MakeTextToSpeechConnection());
     m_synthVoiceSelParams = std::make_shared<google::cloud::texttospeech::v1::VoiceSelectionParams>();
-    m_synthVoice = std::make_shared<google::cloud::texttospeech::v1::Voice>();
     m_synthInput = std::make_shared<google::cloud::texttospeech::v1::SynthesisInput>();
     m_synthAudioConfig = std::make_shared<google::cloud::texttospeech::v1::AudioConfig>();
 
-    if(!setVoice(voiceName))
-    {
-        return false;
-    }
     if(!setLanguage(language))
     {
         return false;
     }
+
+    if(config.check("voice_name"))
+    {
+        if(!setVoice(config.find("voice_name").asString()))
+        {
+            return false;
+        }
+    };
+
     if(!setSpeed(speed))
     {
        return false;
@@ -73,8 +89,6 @@ bool GoogleSpeechSynthesizer::open(yarp::os::Searchable &config)
     {
        return false;
     }
-
-    yCDebug(GOOGLESPEECHSYNTH) << "Speed:" << m_synthAudioConfig->speaking_rate() << "Pitch:" << m_synthAudioConfig->pitch();
 
     m_synthAudioConfig->set_audio_encoding(google::cloud::texttospeech::v1::MP3);
 
@@ -88,7 +102,26 @@ bool GoogleSpeechSynthesizer::close()
 
 bool GoogleSpeechSynthesizer::setLanguage(const std::string& language)
 {
+    if(language == "auto")
+    {
+        yCError(GOOGLESPEECHSYNTH) << "The \"auto\" option is not supported by this device";
+
+        return false;
+    }
+    if(language == m_synthVoiceSelParams->language_code() && m_synthVoices.size() != 0)
+    {
+        yCWarning(GOOGLESPEECHSYNTH) << "The language code is already set to:" << language;
+        return true;
+    }
+    google::cloud::v2_14::StatusOr<google::cloud::texttospeech::v1::ListVoicesResponse> response = m_synthClient->ListVoices(language);
+    if (!response) {
+        yCError(GOOGLESPEECHSYNTH) << "Error in getting the list of available voices. Google status:\n\t" << response.status().message() << "\n";
+        return false;
+    }
+    m_synthVoices = response->voices();
     m_synthVoiceSelParams->set_language_code(language);
+
+    setVoice(m_synthVoices[0].name());
 
     return true;
 }
@@ -102,6 +135,19 @@ bool GoogleSpeechSynthesizer::getLanguage(std::string& language)
 
 bool GoogleSpeechSynthesizer::setVoice(const std::string& voice_name)
 {
+    if(voice_name == "auto")
+    {
+        m_synthVoiceSelParams->set_name(m_synthVoices[0].name());
+        yCInfo(GOOGLESPEECHSYNTH) << "auto option selected. Setting the voice name to:" << m_synthVoiceSelParams->name();
+
+        return true;
+    }
+
+    if(!_voiceSupported(voice_name))
+    {
+        return false;
+    }
+
     m_synthVoiceSelParams->set_name(voice_name);
 
     return true;
@@ -154,7 +200,6 @@ bool GoogleSpeechSynthesizer::getPitch(double& pitch)
 
 bool GoogleSpeechSynthesizer::synthesize(const std::string& text, yarp::sig::Sound& sound)
 {
-    YARP_UNUSED(sound);
     m_synthInput->set_text(text);
     yCDebug(GOOGLESPEECHSYNTH) << m_synthVoiceSelParams->language_code();
     google::cloud::v2_14::StatusOr<google::cloud::texttospeech::v1::SynthesizeSpeechResponse> response = m_synthClient->SynthesizeSpeech(*m_synthInput,*m_synthVoiceSelParams,*m_synthAudioConfig);
@@ -162,13 +207,6 @@ bool GoogleSpeechSynthesizer::synthesize(const std::string& text, yarp::sig::Sou
         yCError(GOOGLESPEECHSYNTH) << "Error synthesizing speech. Google status:\n\t" << response.status().message() << "\n";
         return false;
     }
-
-    /// TODO: REMOVE
-    std::string filename = "hello_world.mp3";
-    std::ofstream outfile(filename, std::ios::binary);
-    outfile.write(response->audio_content().data(), response->audio_content().size());
-    outfile.close();
-    /// TODO: REMOVE
 
     sound.clear();
     if(!yarp::sig::file::read_bytestream(sound, response->audio_content().data(), response->audio_content().size(), ".mp3"))
