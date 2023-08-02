@@ -201,7 +201,6 @@ bool GoogleSpeechSynthesizer::getPitch(double& pitch)
 bool GoogleSpeechSynthesizer::synthesize(const std::string& text, yarp::sig::Sound& sound)
 {
     m_synthInput->set_text(text);
-    yCDebug(GOOGLESPEECHSYNTH) << m_synthVoiceSelParams->language_code();
     google::cloud::v2_14::StatusOr<google::cloud::texttospeech::v1::SynthesizeSpeechResponse> response = m_synthClient->SynthesizeSpeech(*m_synthInput,*m_synthVoiceSelParams,*m_synthAudioConfig);
     if (!response) {
         yCError(GOOGLESPEECHSYNTH) << "Error synthesizing speech. Google status:\n\t" << response.status().message() << "\n";
