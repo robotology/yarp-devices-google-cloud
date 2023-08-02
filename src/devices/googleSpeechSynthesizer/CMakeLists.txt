@@ -38,6 +38,7 @@ if(NOT SKIP_googleSpeechSynthesizer)
 
   if(YARP_COMPILE_TESTS)
     add_subdirectory(tests)
+    add_subdirectory(demos)
   endif()
 
   set_property(TARGET yarp_googleSpeechSynthesizer PROPERTY FOLDER "Plugins/Device")
