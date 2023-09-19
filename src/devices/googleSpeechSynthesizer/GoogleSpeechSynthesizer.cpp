@@ -113,7 +113,7 @@ bool GoogleSpeechSynthesizer::setLanguage(const std::string& language)
         yCWarning(GOOGLESPEECHSYNTH) << "The language code is already set to:" << language;
         return true;
     }
-    google::cloud::v2_14::StatusOr<google::cloud::texttospeech::v1::ListVoicesResponse> response = m_synthClient->ListVoices(language);
+    google::cloud::v2_15::StatusOr<google::cloud::texttospeech::v1::ListVoicesResponse> response = m_synthClient->ListVoices(language);
     if (!response) {
         yCError(GOOGLESPEECHSYNTH) << "Error in getting the list of available voices. Google status:\n\t" << response.status().message() << "\n";
         return false;
@@ -201,7 +201,7 @@ bool GoogleSpeechSynthesizer::getPitch(double& pitch)
 bool GoogleSpeechSynthesizer::synthesize(const std::string& text, yarp::sig::Sound& sound)
 {
     m_synthInput->set_text(text);
-    google::cloud::v2_14::StatusOr<google::cloud::texttospeech::v1::SynthesizeSpeechResponse> response = m_synthClient->SynthesizeSpeech(*m_synthInput,*m_synthVoiceSelParams,*m_synthAudioConfig);
+    google::cloud::v2_15::StatusOr<google::cloud::texttospeech::v1::SynthesizeSpeechResponse> response = m_synthClient->SynthesizeSpeech(*m_synthInput,*m_synthVoiceSelParams,*m_synthAudioConfig);
     if (!response) {
         yCError(GOOGLESPEECHSYNTH) << "Error synthesizing speech. Google status:\n\t" << response.status().message() << "\n";
         return false;
