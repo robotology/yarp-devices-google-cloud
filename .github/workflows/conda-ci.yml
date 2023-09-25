@@ -38,7 +38,7 @@ jobs:
     - name: Check License
       run: |
         perl tests/misc/check_license.pl
-        
+
   check-tests:
     name: 'Check Devices Tests'
     runs-on: ubuntu-20.04
@@ -52,7 +52,7 @@ jobs:
     - name: Check Devices Tests
       run: |
         python3 tests/misc/check_tests.py
-        
+
   build:
     name: '[${{ matrix.os }}@${{ matrix.build_type }}@conda]'
     runs-on: ${{ matrix.os }}
@@ -76,7 +76,7 @@ jobs:
         # Compilation related dependencies
         mamba install cmake compilers make ninja pkg-config
         # Actual dependencies
-        mamba install -c conda-forge -c robostack-staging ycm-cmake-modules eigen ace
+        mamba install -c conda-forge -c robostack-staging ycm-cmake-modules eigen ace google-cloud-cpp
 
 
     - name: Download YARP [Linux&macOS]
