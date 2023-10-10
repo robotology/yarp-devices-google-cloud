@@ -148,6 +148,12 @@ bool GoogleDialogFlowCxChatBot::interact(const std::string& messageIn, std::stri
     if (status.ok()) {
         if (response.has_query_result()) {
             const dialogFlow_cx_v3::QueryResult& query_result = response.query_result();
+            if(query_result.response_messages_size() <= 0)
+            {
+                yCDebug(GOOGLEDIALOGFLOWCXBOT) << "An empty fulfillment was returned. Check the chatbot structure for safety";
+                messageOut = "";
+                return true;
+            }
             messageOut = query_result.response_messages().Get(0).text().text().Get(0);
         } else {
             yCError(GOOGLEDIALOGFLOWCXBOT) << "No query result in the response.";
