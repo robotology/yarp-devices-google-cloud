@@ -122,8 +122,6 @@ bool GoogleDialogFlowCxChatBot::close()
 
 bool GoogleDialogFlowCxChatBot::interact(const std::string& messageIn, std::string& messageOut)
 {
-    YARP_UNUSED(messageIn);
-    YARP_UNUSED(messageOut);
     dialogFlow_cx_v3::DetectIntentRequest req;
 
     // Create a query input
