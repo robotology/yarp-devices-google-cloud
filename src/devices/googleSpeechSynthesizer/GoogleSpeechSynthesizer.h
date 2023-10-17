@@ -101,6 +101,7 @@ public:
     bool synthesize(const std::string& text, yarp::sig::Sound& sound) override;
 
 private:
+    bool m_offline{false};
     std::shared_ptr<google::cloud::texttospeech_v1::TextToSpeechClient>        m_synthClient{nullptr};
     std::shared_ptr<google::cloud::texttospeech::v1::SynthesisInput>           m_synthInput{nullptr};
     std::shared_ptr<google::cloud::texttospeech::v1::VoiceSelectionParams>     m_synthVoiceSelParams{nullptr};

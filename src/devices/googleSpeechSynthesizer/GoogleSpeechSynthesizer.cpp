@@ -32,6 +32,10 @@ GoogleSpeechSynthesizer::GoogleSpeechSynthesizer()
 
 bool GoogleSpeechSynthesizer::_voiceSupported(const std::string& voice_name)
 {
+    if(m_offline)
+    {
+        return true;
+    }
     if(m_synthVoices.size() == 0)
     {
         yCError(GOOGLESPEECHSYNTH) << "You haven't set the language code yet. Voice name cannot be set without a language code";
@@ -52,6 +56,10 @@ bool GoogleSpeechSynthesizer::_voiceSupported(const std::string& voice_name)
 
 bool GoogleSpeechSynthesizer::open(yarp::os::Searchable &config)
 {
+    if(config.check("__offline"))
+    {
+        m_offline = config.find("__offline").asInt32() == 1;
+    }
     if(!config.check("language_code"))
     {
         yCError(GOOGLESPEECHSYNTH) << "No language code specified";
@@ -68,7 +76,7 @@ bool GoogleSpeechSynthesizer::open(yarp::os::Searchable &config)
     m_synthInput = std::make_shared<google::cloud::texttospeech::v1::SynthesisInput>();
     m_synthAudioConfig = std::make_shared<google::cloud::texttospeech::v1::AudioConfig>();
 
-    if(!setLanguage(language))
+    if(!setLanguage(language) && !m_offline)
     {
         return false;
     }
@@ -102,6 +110,11 @@ bool GoogleSpeechSynthesizer::close()
 
 bool GoogleSpeechSynthesizer::setLanguage(const std::string& language)
 {
+    if(m_offline)
+    {
+        m_synthVoiceSelParams->set_language_code(language);
+        return true;
+    }
     if(language == "auto")
     {
         yCError(GOOGLESPEECHSYNTH) << "The \"auto\" option is not supported by this device";
@@ -140,6 +153,12 @@ bool GoogleSpeechSynthesizer::setVoice(const std::string& voice_name)
         m_synthVoiceSelParams->set_name(m_synthVoices[0].name());
         yCInfo(GOOGLESPEECHSYNTH) << "auto option selected. Setting the voice name to:" << m_synthVoiceSelParams->name();
 
+        return true;
+    }
+
+    if(m_offline)
+    {
+        m_synthVoiceSelParams->set_name(voice_name);
         return true;
     }
 

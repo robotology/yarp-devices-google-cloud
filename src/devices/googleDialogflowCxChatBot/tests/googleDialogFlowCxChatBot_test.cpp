@@ -26,6 +26,7 @@ TEST_CASE("dev::googleDialogFlowCxChatBot_test", "[yarp::dev]")
     {
         IChatBot* iChat{nullptr};
         PolyDriver dd;
+        yarp::os::ResourceFinder rf;
 
         rf.setQuiet(false);
         rf.setVerbose(true);
@@ -40,7 +41,7 @@ TEST_CASE("dev::googleDialogFlowCxChatBot_test", "[yarp::dev]")
             pcfg.put("location","global");
             // Fake value for test purpouses
             pcfg.put("project","test_project");
-            pcfg.put("agent","test_agent");
+            pcfg.put("agent_name","test_agent");
             REQUIRE(dd.open(pcfg));
             REQUIRE(dd.view(iChat));
         }
@@ -58,10 +59,10 @@ TEST_CASE("dev::googleDialogFlowCxChatBot_test", "[yarp::dev]")
             resp = iChat->getLanguage(lang_set);
             CHECK(resp);
             CHECK(lang_set==lang_to_set);
-            //Without the proper credentials and agent id the following methods have to fail
-            resp = iChat->interact(messageIn,messageOut);
-            CHECK(!resp);
             resp = iChat->resetBot();
+            CHECK(resp);
+            //Without the proper credentials and agent id the following method has to fail
+            resp = iChat->interact(messageIn,messageOut);
             CHECK(!resp);
         }
 

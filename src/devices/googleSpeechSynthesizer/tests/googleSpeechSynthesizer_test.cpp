@@ -51,6 +51,7 @@ TEST_CASE("dev::googleSpeechSynthesizer_test", "[yarp::dev]")
             pcfg.put("device", "googleSpeechSynthesizer");
             pcfg.put("language_code",init_lang);
             pcfg.put("voice_name",init_voice);
+            pcfg.put("__offline", 1);
             REQUIRE(dd.open(pcfg));
             REQUIRE(dd.view(iSynth));
         }
