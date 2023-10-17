@@ -206,7 +206,7 @@ jobs:
         # Compilation related dependencies
         mamba install cmake compilers make ninja pkg-config
         # Actual dependencies
-        sudo apt-get install -qq -y libc6-dbg
+        sudo apt update && sudo apt-get install -qq -y libc6-dbg
         mamba install -c conda-forge -c robostack-staging ycm-cmake-modules eigen valgrind ace
 
     - name: Download YARP [Linux&macOS]
