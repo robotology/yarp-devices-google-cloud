@@ -68,8 +68,10 @@ TEST_CASE("dev::googleSpeechSynthesizer_test", "[yarp::dev]")
         CHECK(lang_code == lang_to_set);
         CHECK(iSynth->getVoice(voice_name));
         CHECK(voice_name == voice_to_set);
-        CHECK(iSynth->synthesize(toSynthesize,outputSound));
-        CHECK(outputSound == snd);
+
+        // For the moment being, actually using the API for test only purposes doesn't seem like a good idea since it will waste money
+        //CHECK(iSynth->synthesize(toSynthesize,outputSound));
+        //CHECK(outputSound == snd);
 
         //"Close all polydrivers and check"
         {
