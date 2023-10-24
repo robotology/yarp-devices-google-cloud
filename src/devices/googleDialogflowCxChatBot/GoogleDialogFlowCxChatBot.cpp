@@ -178,6 +178,12 @@ bool GoogleDialogFlowCxChatBot::getLanguage(std::string& language)
     return true;
 }
 
+bool GoogleDialogFlowCxChatBot::getStatus(std::string& status)
+{
+    YARP_UNUSED(status);
+    return true;
+}
+
 bool GoogleDialogFlowCxChatBot::resetBot()
 {
     m_sessionId = m_agentId + "/sessions/" + _getRandSession_();
