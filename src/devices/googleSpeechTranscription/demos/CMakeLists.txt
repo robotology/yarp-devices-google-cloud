@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2023-2023 Istituto Italiano di Tecnologia (IIT)
 # SPDX-License-Identifier: BSD-3-Clause
 
-set(appname googleSpeechSynthesizer_demo)
+set(appname googleSpeechTranscription_demo)
 
 file(GLOB conf      ${CMAKE_CURRENT_SOURCE_DIR}/yarprobotinterface_xml/*.xml)
 file(GLOB data      ${CMAKE_CURRENT_SOURCE_DIR}/*.wav)

@@ -36,9 +36,10 @@ if(NOT SKIP_googleSpeechTranscription)
     YARP_INI DESTINATION ${YARP_PLUGIN_MANIFESTS_INSTALL_DIR}
   )
 
+  add_subdirectory(demos)
+
   if(YARP_COMPILE_TESTS)
     add_subdirectory(tests)
-    add_subdirectory(demos)
   endif()
 
   set_property(TARGET yarp_googleSpeechTranscription PROPERTY FOLDER "Plugins/Device")
