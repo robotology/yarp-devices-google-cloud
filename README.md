@@ -44,7 +44,7 @@ CI Status
 
 :construction: This repository is currently work in progress. :construction:
 
-[![Build Status](https://github.com/robotology/yarp-device-template/workflows/CI%20Workflow/badge.svg)](https://github.com/robotology/yarp-device-template/actions?query=workflow%3A%22CI+Workflow%22)
+[![Build Status](https://github.com/elandini84/yarp-devices-google-cloud/workflows/CI%20Workflow/badge.svg)](https://github.com/elandini84/yarp-devices-google-cloud/actions?query=workflow%3A%22CI+Workflow%22)
 
 License
 ---------
