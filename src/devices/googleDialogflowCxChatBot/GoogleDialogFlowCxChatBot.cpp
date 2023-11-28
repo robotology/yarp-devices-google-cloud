@@ -112,6 +112,17 @@ bool GoogleDialogFlowCxChatBot::open(yarp::os::Searchable &config)
     m_sessionId = m_agentId + "/sessions/" + _getRandSession_();
     m_channel = grpc::CreateChannel("dialogflow.googleapis.com", grpc::GoogleDefaultCredentials());
     m_sessionStub = dialogFlow_cx_v3::Sessions::NewStub(m_channel);
+
+    // Get the currently active agent page
+    std::string message{"*"};
+    std::string resp;
+    if(!interact(message,resp))
+    {
+        yCError(GOOGLEDIALOGFLOWCXBOT) << "Could not retrieve the current chatbot status";
+
+        return false;
+    }
+
     return true;
 }
 
@@ -145,6 +156,7 @@ bool GoogleDialogFlowCxChatBot::interact(const std::string& messageIn, std::stri
     // Handle the response
     if (status.ok()) {
         if (response.has_query_result()) {
+            m_currentPage = response.query_result().current_page().display_name();
             const dialogFlow_cx_v3::QueryResult& query_result = response.query_result();
             if(query_result.response_messages_size() <= 0)
             {
@@ -180,7 +192,8 @@ bool GoogleDialogFlowCxChatBot::getLanguage(std::string& language)
 
 bool GoogleDialogFlowCxChatBot::getStatus(std::string& status)
 {
-    YARP_UNUSED(status);
+    status = m_currentPage;
+
     return true;
 }
 

@@ -97,6 +97,7 @@ private:
     std::string m_agentId;
     std::string m_sessionId;
     std::string m_languageCode;
+    std::string m_currentPage;
     std::shared_ptr<grpc::Channel> m_channel;
     std::unique_ptr<google::cloud::dialogflow::cx::v3::Sessions::Stub> m_sessionStub;
     std::shared_ptr<google::cloud::dialogflow_cx::SessionsClient> m_session{nullptr};
