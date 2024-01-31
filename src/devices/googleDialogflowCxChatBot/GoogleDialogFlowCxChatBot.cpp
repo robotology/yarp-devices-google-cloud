@@ -86,7 +86,7 @@ bool GoogleDialogFlowCxChatBot::open(yarp::os::Searchable &config)
     double oldTime = yarp::os::Time::now();
     yCWarning(GOOGLEDIALOGFLOWCXBOT) << "Time" << oldTime;
     //auto agentsList = agentsClient.ListAgents(parent);
-    google::cloud::v2_15::Options opt;
+    google::cloud::Options opt;
     auto agentsList = agentsClient.ListAgents(request,opt);
     yCWarning(GOOGLEDIALOGFLOWCXBOT) << "Time" << yarp::os::Time::now() - oldTime;
     yCWarning(GOOGLEDIALOGFLOWCXBOT) << "Siamo qui 5" << m_location;
