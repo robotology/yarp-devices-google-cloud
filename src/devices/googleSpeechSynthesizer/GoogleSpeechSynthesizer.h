@@ -15,6 +15,8 @@
 #include "google/cloud/texttospeech/v1/text_to_speech_client.h"
 #include "google/protobuf/repeated_ptr_field.h"
 
+#include "GoogleSpeechSynthesizer_ParamsParser.h"
+
 // Constants
 const std::pair SPEED_RANGE{0.25, 4.0};
 const std::pair PITCH_RANGE{-20.0, 20.0};
@@ -26,48 +28,13 @@ const std::pair PITCH_RANGE{-20.0, 20.0};
  *
  * \brief `googleSpeechSynthesizer`: A yarp device for speech synthesis using google cloud cpp libraries
  *
- *  Parameters required by this device are:
- * | Parameter name | SubParameter | Type    | Units          | Default Value | Required | Description                                                                                                                                                                                                                                    | Notes |
- * |:--------------:|:------------:|:-------:|:--------------:|:-------------:|:--------:|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:-----:|
- * | language_code  | -            | string  | -              | -             | Yes      | Language for speech synthesis (e.g. "ita", "eng")                                                                                                                                                                                              |       |
- * | voice_name     | -            | string  | -              | -             | No       | The voice set for speech synthesis. If not set, the device will pick the first available voice for the selected language code (This page holds the complete list of the available voices: https://cloud.google.com/text-to-speech/docs/voices) |       |
- * | voice_speed    | -            | double  | -              | 1.0           | No       | Speaking rate/speed, in the range [0.25, 4.0]. 1.0 is the normal native speed supported by the specific voice. 2.0 is twice as fast, and 0.5 is half as fast.                                                                                  |       |
- * | voice_pitch    | -            | double  | -              | 0.0           | No       | Speaking pitch, in the range [-20.0, 20.0]. 20 means increase 20 semitones from the original pitch. -20 means decrease 20 semitones from the original pitch.                                                                                   |       |
+ *  Parameters required by this device are described in class GoogleSpeechSynthesizer_ParamsParser
  *
- *
- * example of xml file with a fake odometer
- *
- * \code{.unparsed}
- * <?xml version="1.0" encoding="UTF-8"?>
- * <!DOCTYPE robot PUBLIC "-//YARP//DTD yarprobotinterface 3.0//EN" "http://www.yarp.it/DTD/yarprobotinterfaceV3.0.dtd">
- * <robot name="googleTest" build="2" portprefix="/googleSynth" xmlns:xi="http://www.w3.org/2001/XInclude">
- *     <devices>
- *         <device name="googleSynth" type="googleSpeechSynthesizer">
- *             <param name="language_code">
- *                 it-IT
- *             </param>
- *             <param name="voice_name">
- *                 it-IT-Standard-B
- *             </param>
- *         </device>
- *
- *         <device name="synthWrap" type="speechSynthesizer_nws_yarp">
- *             <action phase="startup" level="5" type="attach">
- *                 <paramlist name="networks">
- *                     <elem name="subdeviceGoogle">
- *                         googleSynth
- *                     </elem>
- *                 </paramlist>
- *             </action>
- *             <action phase="shutdown" level="5" type="detach" />
- *         </device>
- *     </devices>
- * </robot>
- * \endcode
  */
 
 class GoogleSpeechSynthesizer :
         public yarp::dev::DeviceDriver,
+        public GoogleSpeechSynthesizer_ParamsParser,
         public yarp::dev::ISpeechSynthesizer
 {
 public:

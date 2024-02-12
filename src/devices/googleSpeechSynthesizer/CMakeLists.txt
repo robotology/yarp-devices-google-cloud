@@ -17,6 +17,8 @@ if(NOT SKIP_googleSpeechSynthesizer)
     PRIVATE
       GoogleSpeechSynthesizer.cpp
       GoogleSpeechSynthesizer.h
+      GoogleSpeechSynthesizer_ParamsParser.cpp
+      GoogleSpeechSynthesizer_ParamsParser.h
   )
 
   target_link_libraries(yarp_googleSpeechSynthesizer
