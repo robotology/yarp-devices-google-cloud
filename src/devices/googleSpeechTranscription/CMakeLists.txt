@@ -17,6 +17,8 @@ if(NOT SKIP_googleSpeechTranscription)
     PRIVATE
       GoogleSpeechTranscription.cpp
       GoogleSpeechTranscription.h
+      GoogleSpeechTranscription_ParamsParser.h
+      GoogleSpeechTranscription_ParamsParser.cpp
   )
 
   target_link_libraries(yarp_googleSpeechTranscription
