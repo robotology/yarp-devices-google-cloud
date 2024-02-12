@@ -35,17 +35,14 @@ bool GoogleSpeechTranscription::open(yarp::os::Searchable &config)
     {
         m_offline = config.find("__offline").asInt32() == 1;
     }
-    if(!config.check("language_code"))
+    if(!parseParams(config))
     {
-        yCError(GOOGLESPEECHTRANSCR) << "No language code specified";
-
+        yCError(GOOGLESPEECHTRANSCR) << "Unable to correctly parse device params. Check previous errors for more info";
         return false;
     }
-    m_sampleRate = config.check("sample_rate_hertz", yarp::os::Value(16000), "sample rate (int)").asInt32();
-    m_languageCode = config.find("language_code").asString();
-    m_audioConfig.set_language_code(m_languageCode);
+    m_audioConfig.set_language_code(m_language_code);
     m_audioConfig.set_encoding(google::cloud::speech::v1::RecognitionConfig::LINEAR16);
-    m_audioConfig.set_sample_rate_hertz(m_sampleRate);
+    m_audioConfig.set_sample_rate_hertz(m_sample_rate_hertz);
     m_client = std::make_shared<google::cloud::speech_v1::SpeechClient>(google::cloud::speech_v1::MakeSpeechConnection());
 
     return true;

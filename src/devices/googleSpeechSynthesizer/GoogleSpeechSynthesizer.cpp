@@ -60,23 +60,15 @@ bool GoogleSpeechSynthesizer::open(yarp::os::Searchable &config)
     {
         m_offline = config.find("__offline").asInt32() == 1;
     }
-    if(!config.check("language_code"))
-    {
-        yCError(GOOGLESPEECHSYNTH) << "No language code specified";
 
-        return false;
-    }
-    std::string language = config.find("language_code").asString();
-
-    double speed = config.check("voice_speed",yarp::os::Value(1.0),"").asFloat64();
-    double pitch = config.check("voice_pitch",yarp::os::Value(0.0),"").asFloat64();
+    parseParams(config);
 
     m_synthClient = std::make_shared<texttospeech::TextToSpeechClient>(texttospeech::MakeTextToSpeechConnection());
     m_synthVoiceSelParams = std::make_shared<google::cloud::texttospeech::v1::VoiceSelectionParams>();
     m_synthInput = std::make_shared<google::cloud::texttospeech::v1::SynthesisInput>();
     m_synthAudioConfig = std::make_shared<google::cloud::texttospeech::v1::AudioConfig>();
 
-    if(!setLanguage(language) && !m_offline)
+    if(!setLanguage(m_language_code) && !m_offline)
     {
         return false;
     }
@@ -89,11 +81,11 @@ bool GoogleSpeechSynthesizer::open(yarp::os::Searchable &config)
         }
     };
 
-    if(!setSpeed(speed))
+    if(!setSpeed(m_voice_speed))
     {
        return false;
     }
-    if(!setPitch(pitch))
+    if(!setPitch(m_voice_pitch))
     {
        return false;
     }

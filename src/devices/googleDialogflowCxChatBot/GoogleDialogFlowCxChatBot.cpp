@@ -41,24 +41,7 @@ bool GoogleDialogFlowCxChatBot::open(yarp::os::Searchable &config)
 {
     yCDebug(GOOGLEDIALOGFLOWCXBOT) << "Configuration: \n" << config.toString().c_str();
 
-    if(!config.check("project"))
-    {
-        yCError(GOOGLEDIALOGFLOWCXBOT) << "project parameter must be specified";
-        return false;
-    }
-    m_project = config.find("project").asString();
-
-    if(!config.check("location"))
-    {
-        yCError(GOOGLEDIALOGFLOWCXBOT) << "location parameter must be specified";
-        return false;
-    }
-    m_location = config.find("location").asString();
-
-    if(config.check("language_code"))
-    {
-        m_languageCode = config.find("language_code").asString();
-    }
+    parseParams(config);
 
 #ifdef USE_DISPLAY_NAME
     if(!config.check("display_name"))
@@ -69,19 +52,12 @@ bool GoogleDialogFlowCxChatBot::open(yarp::os::Searchable &config)
 
     std::string displayName = config.find("display_name").asString();
 
-    yCWarning(GOOGLEDIALOGFLOWCXBOT) << "Siamo qui" << m_location;
-
     google::cloud::dialogflow_cx::AgentsClient agentsClient(google::cloud::dialogflow_cx::MakeAgentsConnection(m_location));
 
-    yCWarning(GOOGLEDIALOGFLOWCXBOT) << "Siamo qui 2" << "";
-
     dialogFlow_cx_v3::ListAgentsRequest request;
-    yCWarning(GOOGLEDIALOGFLOWCXBOT) << "Siamo qui 3" << m_location;
 
     std::string parent = "projects/"+m_project;
     request.set_parent(parent);
-
-    yCWarning(GOOGLEDIALOGFLOWCXBOT) << "Siamo qui 4" << request.IsInitialized();;
 
     double oldTime = yarp::os::Time::now();
     yCWarning(GOOGLEDIALOGFLOWCXBOT) << "Time" << oldTime;
@@ -89,25 +65,16 @@ bool GoogleDialogFlowCxChatBot::open(yarp::os::Searchable &config)
     google::cloud::Options opt;
     auto agentsList = agentsClient.ListAgents(request,opt);
     yCWarning(GOOGLEDIALOGFLOWCXBOT) << "Time" << yarp::os::Time::now() - oldTime;
-    yCWarning(GOOGLEDIALOGFLOWCXBOT) << "Siamo qui 5" << m_location;
 
     for (const auto& agent : agentsList) {
-        yCWarning(GOOGLEDIALOGFLOWCXBOT) << "Siamo qui 6" << agent.ok() <<"wait for 30 seconds";
         std::this_thread::sleep_for(30s);
-        yCWarning(GOOGLEDIALOGFLOWCXBOT) << "Siamo qui 7" <<"waited for 30 seconds";
         if (agent->display_name() == displayName) {
             m_agentId = agent->name();
-            yCWarning(GOOGLEDIALOGFLOWCXBOT) << "Siamo qui 7" << m_agentId;
             break;
         }
     }
 #else
-    if(!config.check("agent_name"))
-    {
-        yCError(GOOGLEDIALOGFLOWCXBOT) << "agent_name parameter must be specified";
-        return false;
-    }
-    m_agentId = "projects/" + m_project + "/locations/" + m_location + "/agents/" + config.find("agent_name").asString();
+    m_agentId = "projects/" + m_project + "/locations/" + m_location + "/agents/" + m_agent_name;
 #endif
     m_sessionId = m_agentId + "/sessions/" + _getRandSession_();
     m_channel = grpc::CreateChannel("dialogflow.googleapis.com", grpc::GoogleDefaultCredentials());
@@ -116,7 +83,7 @@ bool GoogleDialogFlowCxChatBot::open(yarp::os::Searchable &config)
     // Get the currently active agent page
     std::string message{"*"};
     std::string resp;
-    bool isItATest = (config.find("agent_name").asString() == "test_agent") && (config.find("project").asString() == "test_project");
+    bool isItATest = (m_agent_name == "test_agent") && (m_project == "test_project");
     if(!interact(message,resp) && !isItATest)
     {
         yCError(GOOGLEDIALOGFLOWCXBOT) << "Could not retrieve the current chatbot status";
@@ -139,7 +106,7 @@ bool GoogleDialogFlowCxChatBot::interact(const std::string& messageIn, std::stri
     // Create a query input
     dialogFlow_cx_v3::QueryInput query_input;
     auto parameters = query_input.mutable_language_code();
-    *parameters = m_languageCode;
+    *parameters = m_language_code;
     dialogFlow_cx_v3::TextInput* text_input = query_input.mutable_text();
     text_input->set_text(messageIn);
 
@@ -181,13 +148,13 @@ bool GoogleDialogFlowCxChatBot::interact(const std::string& messageIn, std::stri
 
 bool GoogleDialogFlowCxChatBot::setLanguage(const std::string& language)
 {
-    m_languageCode = language;
+    m_language_code = language;
     return true;
 }
 
 bool GoogleDialogFlowCxChatBot::getLanguage(std::string& language)
 {
-    language = m_languageCode;
+    language = m_language_code;
     return true;
 }
 

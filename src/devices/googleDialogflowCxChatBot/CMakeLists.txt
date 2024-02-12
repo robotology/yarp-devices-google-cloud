@@ -17,6 +17,8 @@ if(NOT SKIP_googleDialogFlowCxChatBot)
     PRIVATE
       GoogleDialogFlowCxChatBot.cpp
       GoogleDialogFlowCxChatBot.h
+      GoogleDialogFlowCxChatBot_ParamsParser.cpp
+      GoogleDialogFlowCxChatBot_ParamsParser.h
   )
 
   target_link_libraries(yarp_googleDialogFlowCxChatBot
