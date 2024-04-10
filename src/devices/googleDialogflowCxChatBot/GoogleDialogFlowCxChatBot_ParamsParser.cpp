@@ -8,7 +8,7 @@
 // This is an automatically generated file. Please do not edit it.
 // It will be re-generated if the cmake flag ALLOW_DEVICE_PARAM_PARSER_GERNERATION is ON.
 
-// Generated on: Mon Feb 12 15:05:53 2024
+// Generated on: Wed Apr 10 11:18:27 2024
 
 
 #include "GoogleDialogFlowCxChatBot_ParamsParser.h"
@@ -17,6 +17,11 @@
 
 namespace {
     YARP_LOG_COMPONENT(GoogleDialogFlowCxChatBotParamsCOMPONENT, "yarp.device.GoogleDialogFlowCxChatBot")
+}
+
+
+GoogleDialogFlowCxChatBot_ParamsParser::GoogleDialogFlowCxChatBot_ParamsParser()
+{
 }
 
 
@@ -145,8 +150,8 @@ std::string      GoogleDialogFlowCxChatBot_ParamsParser::getDocumentationOfDevic
     doc = doc + std::string("'language_code': The language code to use for the interaction with the bot\n");
     doc = doc + std::string("\n");
     doc = doc + std::string("Here are some examples of invocation command with yarpdev, with all params:\n");
-    doc = doc + " yarpdev --device GoogleDialogFlowCxChatBot --project <mandatory_value> --location <mandatory_value> --agent_name <mandatory_value> --language_code en-US\n";
+    doc = doc + " yarpdev --device googleDialogFlowCxChatBot --project <mandatory_value> --location <mandatory_value> --agent_name <mandatory_value> --language_code en-US\n";
     doc = doc + std::string("Using only mandatory params:\n");
-    doc = doc + " yarpdev --device GoogleDialogFlowCxChatBot --project <mandatory_value> --location <mandatory_value> --agent_name <mandatory_value>\n";
+    doc = doc + " yarpdev --device googleDialogFlowCxChatBot --project <mandatory_value> --location <mandatory_value> --agent_name <mandatory_value>\n";
     doc = doc + std::string("=============================================\n\n");    return doc;
 }

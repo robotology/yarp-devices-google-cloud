@@ -8,7 +8,7 @@
 // This is an automatically generated file. Please do not edit it.
 // It will be re-generated if the cmake flag ALLOW_DEVICE_PARAM_PARSER_GERNERATION is ON.
 
-// Generated on: Fri Feb  9 18:37:44 2024
+// Generated on: Wed Apr 10 11:34:08 2024
 
 
 #include "GoogleSpeechTranscription_ParamsParser.h"
@@ -17,6 +17,11 @@
 
 namespace {
     YARP_LOG_COMPONENT(GoogleSpeechTranscriptionParamsCOMPONENT, "yarp.device.GoogleSpeechTranscription")
+}
+
+
+GoogleSpeechTranscription_ParamsParser::GoogleSpeechTranscription_ParamsParser()
+{
 }
 
 
@@ -109,8 +114,8 @@ std::string      GoogleSpeechTranscription_ParamsParser::getDocumentationOfDevic
     doc = doc + std::string("'sample_rate_hertz': The input audio sample rate\n");
     doc = doc + std::string("\n");
     doc = doc + std::string("Here are some examples of invocation command with yarpdev, with all params:\n");
-    doc = doc + " yarpdev --device GoogleSpeechTranscription --language_code <mandatory_value> --sample_rate_hertz 16000\n";
+    doc = doc + " yarpdev --device googleSpeechTranscription --language_code <mandatory_value> --sample_rate_hertz 16000\n";
     doc = doc + std::string("Using only mandatory params:\n");
-    doc = doc + " yarpdev --device GoogleSpeechTranscription --language_code <mandatory_value>\n";
+    doc = doc + " yarpdev --device googleSpeechTranscription --language_code <mandatory_value>\n";
     doc = doc + std::string("=============================================\n\n");    return doc;
 }

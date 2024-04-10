@@ -8,7 +8,7 @@
 // This is an automatically generated file. Please do not edit it.
 // It will be re-generated if the cmake flag ALLOW_DEVICE_PARAM_PARSER_GERNERATION is ON.
 
-// Generated on: Mon Feb 12 14:20:13 2024
+// Generated on: Wed Apr 10 11:16:30 2024
 
 
 #include "GoogleSpeechSynthesizer_ParamsParser.h"
@@ -17,6 +17,11 @@
 
 namespace {
     YARP_LOG_COMPONENT(GoogleSpeechSynthesizerParamsCOMPONENT, "yarp.device.GoogleSpeechSynthesizer")
+}
+
+
+GoogleSpeechSynthesizer_ParamsParser::GoogleSpeechSynthesizer_ParamsParser()
+{
 }
 
 
@@ -141,8 +146,8 @@ std::string      GoogleSpeechSynthesizer_ParamsParser::getDocumentationOfDeviceP
     doc = doc + std::string("'voice_pitch': Speaking pitch, in the range [-20.0, 20.0]. 20 means increase 20 semitones from the original pitch. -20 means decrease 20 semitones from the original pitch.\n");
     doc = doc + std::string("\n");
     doc = doc + std::string("Here are some examples of invocation command with yarpdev, with all params:\n");
-    doc = doc + " yarpdev --device GoogleSpeechSynthesizer --language_code <mandatory_value> --voice_name <optional_value> --voice_speed 1 --voice_pitch 0\n";
+    doc = doc + " yarpdev --device googleSpeechSynthesizer --language_code <mandatory_value> --voice_name <optional_value> --voice_speed 1 --voice_pitch 0\n";
     doc = doc + std::string("Using only mandatory params:\n");
-    doc = doc + " yarpdev --device GoogleSpeechSynthesizer --language_code <mandatory_value>\n";
+    doc = doc + " yarpdev --device googleSpeechSynthesizer --language_code <mandatory_value>\n";
     doc = doc + std::string("=============================================\n\n");    return doc;
 }
