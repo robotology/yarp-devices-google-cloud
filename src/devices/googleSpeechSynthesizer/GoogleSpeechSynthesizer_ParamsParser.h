@@ -8,7 +8,7 @@
 // This is an automatically generated file. Please do not edit it.
 // It will be re-generated if the cmake flag ALLOW_DEVICE_PARAM_PARSER_GERNERATION is ON.
 
-// Generated on: Wed Apr 10 11:16:30 2024
+// Generated on: Mon Sep  2 11:30:52 2024
 
 
 #ifndef GOOGLESPEECHSYNTHESIZER_PARAMSPARSER_H
