@@ -12,6 +12,7 @@ find_package(google_cloud_cpp_texttospeech REQUIRED)
 
 if(NOT SKIP_googleSpeechSynthesizer)
   yarp_add_plugin(yarp_googleSpeechSynthesizer)
+  generateDeviceParamsParser(GoogleSpeechSynthesizer googleSpeechSynthesizer)
 
   target_sources(yarp_googleSpeechSynthesizer
     PRIVATE
