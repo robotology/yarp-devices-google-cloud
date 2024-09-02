@@ -12,6 +12,7 @@ find_package(google_cloud_cpp_speech REQUIRED)
 
 if(NOT SKIP_googleSpeechTranscription)
   yarp_add_plugin(yarp_googleSpeechTranscription)
+  generateDeviceParamsParser(GoogleSpeechTranscription googleSpeechTranscription)
 
   target_sources(yarp_googleSpeechTranscription
     PRIVATE
