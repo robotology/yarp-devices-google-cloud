@@ -12,6 +12,7 @@ find_package(google_cloud_cpp_dialogflow_cx REQUIRED)
 
 if(NOT SKIP_googleDialogFlowCxChatBot)
   yarp_add_plugin(yarp_googleDialogFlowCxChatBot)
+  generateDeviceParamsParser(GoogleDialogFlowCxChatBot googleDialogFlowCxChatBot)
 
   target_sources(yarp_googleDialogFlowCxChatBot
     PRIVATE
