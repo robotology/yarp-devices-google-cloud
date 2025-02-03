@@ -100,129 +100,130 @@ bool GoogleSpeechSynthesizer::close()
     return true;
 }
 
-bool GoogleSpeechSynthesizer::setLanguage(const std::string& language)
+yarp::dev::ReturnValue GoogleSpeechSynthesizer::setLanguage(const std::string& language)
 {
     if(m_offline)
     {
         m_synthVoiceSelParams->set_language_code(language);
-        return true;
+        return yarp::dev::ReturnValue::return_code::return_value_ok;
     }
     if(language == "auto")
     {
         yCError(GOOGLESPEECHSYNTH) << "The \"auto\" option is not supported by this device";
 
-        return false;
+        return yarp::dev::ReturnValue::return_code::return_value_error_generic;
     }
     if(language == m_synthVoiceSelParams->language_code() && m_synthVoices.size() != 0)
     {
         yCWarning(GOOGLESPEECHSYNTH) << "The language code is already set to:" << language;
-        return true;
+        return yarp::dev::ReturnValue::return_code::return_value_error_generic;
     }
     google::cloud::StatusOr<google::cloud::texttospeech::v1::ListVoicesResponse> response = m_synthClient->ListVoices(language);
     if (!response) {
         yCError(GOOGLESPEECHSYNTH) << "Error in getting the list of available voices. Google status:\n\t" << response.status().message() << "\n";
-        return false;
+        return yarp::dev::ReturnValue::return_code::return_value_error_generic;
     }
     m_synthVoices = response->voices();
     m_synthVoiceSelParams->set_language_code(language);
 
     setVoice(m_synthVoices[0].name());
 
-    return true;
+    return yarp::dev::ReturnValue::return_code::return_value_ok;
 }
 
-bool GoogleSpeechSynthesizer::getLanguage(std::string& language)
+yarp::dev::ReturnValue GoogleSpeechSynthesizer::getLanguage(std::string& language)
 {
     language = m_synthVoiceSelParams->language_code();
 
-    return true;
+    return yarp::dev::ReturnValue::return_code::return_value_ok;
 }
 
-bool GoogleSpeechSynthesizer::setVoice(const std::string& voice_name)
+yarp::dev::ReturnValue GoogleSpeechSynthesizer::setVoice(const std::string& voice_name)
 {
     if(voice_name == "auto")
     {
         m_synthVoiceSelParams->set_name(m_synthVoices[0].name());
         yCInfo(GOOGLESPEECHSYNTH) << "auto option selected. Setting the voice name to:" << m_synthVoiceSelParams->name();
 
-        return true;
+        return yarp::dev::ReturnValue::return_code::return_value_ok;
     }
 
     if(m_offline)
     {
         m_synthVoiceSelParams->set_name(voice_name);
-        return true;
+        return yarp::dev::ReturnValue::return_code::return_value_ok;
     }
 
     if(!_voiceSupported(voice_name))
     {
-        return false;
+        return yarp::dev::ReturnValue::return_code::return_value_error_generic;
     }
 
     m_synthVoiceSelParams->set_name(voice_name);
 
-    return true;
+    return yarp::dev::ReturnValue::return_code::return_value_ok;
 }
 
-bool GoogleSpeechSynthesizer::getVoice(std::string& voice_name)
+yarp::dev::ReturnValue GoogleSpeechSynthesizer::getVoice(std::string& voice_name)
 {
     voice_name = m_synthVoiceSelParams->name();
 
-    return true;
+    return yarp::dev::ReturnValue::return_code::return_value_ok;
 }
 
-bool GoogleSpeechSynthesizer::setSpeed(const double speed)
+yarp::dev::ReturnValue GoogleSpeechSynthesizer::setSpeed(const double speed)
 {
     m_synthAudioConfig->set_speaking_rate(speed);
     if(speed < SPEED_RANGE.first || speed > SPEED_RANGE.second)
     {
         yCError(GOOGLESPEECHSYNTH) << "Error while setting the speach rate (speed). The value is outside the allowed range [" << SPEED_RANGE.first << SPEED_RANGE.second << "]";
-        return false;
+        return yarp::dev::ReturnValue::return_code::return_value_error_generic;
     }
 
-    return true;
+    return yarp::dev::ReturnValue::return_code::return_value_ok;
 }
 
-bool GoogleSpeechSynthesizer::getSpeed(double& speed)
+yarp::dev::ReturnValue GoogleSpeechSynthesizer::getSpeed(double& speed)
 {
     speed = m_synthAudioConfig->speaking_rate();
 
-    return true;
+    return yarp::dev::ReturnValue::return_code::return_value_ok;
 }
 
-bool GoogleSpeechSynthesizer::setPitch(const double pitch)
+yarp::dev::ReturnValue GoogleSpeechSynthesizer::setPitch(const double pitch)
 {
     m_synthAudioConfig->set_pitch(pitch);
     if(pitch < PITCH_RANGE.first || pitch > PITCH_RANGE.second)
     {
         yCError(GOOGLESPEECHSYNTH) << "Error while setting the speach pitch. The value is outside the allowed range [" << PITCH_RANGE.first << PITCH_RANGE.second << "]";
-        return false;
+        return yarp::dev::ReturnValue::return_code::return_value_error_generic;
     }
 
-    return true;
+    return yarp::dev::ReturnValue::return_code::return_value_ok;
 }
 
-bool GoogleSpeechSynthesizer::getPitch(double& pitch)
+yarp::dev::ReturnValue GoogleSpeechSynthesizer::getPitch(double& pitch)
 {
     pitch = m_synthAudioConfig->pitch();
 
-    return true;
+    return yarp::dev::ReturnValue::return_code::return_value_ok;
 }
 
-bool GoogleSpeechSynthesizer::synthesize(const std::string& text, yarp::sig::Sound& sound)
+yarp::dev::ReturnValue GoogleSpeechSynthesizer::synthesize(const std::string& text, yarp::sig::Sound& sound)
 {
     m_synthInput->set_text(text);
     google::cloud::StatusOr<google::cloud::texttospeech::v1::SynthesizeSpeechResponse> response = m_synthClient->SynthesizeSpeech(*m_synthInput,*m_synthVoiceSelParams,*m_synthAudioConfig);
     if (!response) {
         yCError(GOOGLESPEECHSYNTH) << "Error synthesizing speech. Google status:\n\t" << response.status().message() << "\n";
-        return false;
+        return yarp::dev::ReturnValue::return_code::return_value_error_generic;
     }
 
     sound.clear();
     if(!yarp::sig::file::read_bytestream(sound, response->audio_content().data(), response->audio_content().size(), ".mp3"))
     {
         yCError(GOOGLESPEECHSYNTH) << "Error while transfering data from google response to yarp::sigSound sound object";
+        return yarp::dev::ReturnValue::return_code::return_value_error_generic;
     }
 
-    return true;
+    return yarp::dev::ReturnValue::return_code::return_value_ok;
 }
