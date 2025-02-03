@@ -53,27 +53,27 @@ bool GoogleSpeechTranscription::close()
     return true;
 }
 
-bool GoogleSpeechTranscription::setLanguage(const std::string& language)
+yarp::dev::ReturnValue GoogleSpeechTranscription::setLanguage(const std::string& language)
 {
     if(language == "auto")
     {
         yCError(GOOGLESPEECHTRANSCR) << "The \"auto\" option is not supported by this device";
 
-        return false;
+        return yarp::dev::ReturnValue::return_code::return_value_error_generic;
     }
 
     m_audioConfig.set_language_code(language);
-    return true;
+    yarp::dev::ReturnValue::return_code::return_value_ok;
 }
 
-bool GoogleSpeechTranscription::getLanguage(std::string& language)
+yarp::dev::ReturnValue GoogleSpeechTranscription::getLanguage(std::string& language)
 {
     language = m_audioConfig.language_code();
 
-    return true;
+    yarp::dev::ReturnValue::return_code::return_value_ok;
 }
 
-bool GoogleSpeechTranscription::transcribe(const yarp::sig::Sound& sound, std::string& transcription, double& score)
+yarp::dev::ReturnValue GoogleSpeechTranscription::transcribe(const yarp::sig::Sound& sound, std::string& transcription, double& score)
 {
     transcription="";
     score = 0.0;
@@ -82,7 +82,7 @@ bool GoogleSpeechTranscription::transcribe(const yarp::sig::Sound& sound, std::s
         sound.getChannels() == 0)
     {
         yCError(GOOGLESPEECHTRANSCR) << "Invalid Sound sample received";
-        return false;
+        return yarp::dev::ReturnValue::return_code::return_value_error_generic;
     }
 
     google::cloud::speech::v1::RecognitionAudio audio;
@@ -95,7 +95,7 @@ bool GoogleSpeechTranscription::transcribe(const yarp::sig::Sound& sound, std::s
     if(!response)
     {
         yCError(GOOGLESPEECHTRANSCR) << "Could not perform audio transcription:" << response.status().message();
-        return false;
+        return yarp::dev::ReturnValue::return_code::return_value_error_generic;
     }
 
     yCDebug(GOOGLESPEECHTRANSCR) << "Results size:" << response->results_size();
@@ -116,5 +116,5 @@ bool GoogleSpeechTranscription::transcribe(const yarp::sig::Sound& sound, std::s
         }
     }
 
-    return true;
+    yarp::dev::ReturnValue::return_code::return_value_ok;
 }
