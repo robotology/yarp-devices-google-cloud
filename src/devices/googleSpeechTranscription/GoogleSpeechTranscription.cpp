@@ -63,14 +63,14 @@ yarp::dev::ReturnValue GoogleSpeechTranscription::setLanguage(const std::string&
     }
 
     m_audioConfig.set_language_code(language);
-    yarp::dev::ReturnValue::return_code::return_value_ok;
+    return yarp::dev::ReturnValue::return_code::return_value_ok;
 }
 
 yarp::dev::ReturnValue GoogleSpeechTranscription::getLanguage(std::string& language)
 {
     language = m_audioConfig.language_code();
 
-    yarp::dev::ReturnValue::return_code::return_value_ok;
+    return yarp::dev::ReturnValue::return_code::return_value_ok;
 }
 
 yarp::dev::ReturnValue GoogleSpeechTranscription::transcribe(const yarp::sig::Sound& sound, std::string& transcription, double& score)
@@ -115,6 +115,6 @@ yarp::dev::ReturnValue GoogleSpeechTranscription::transcribe(const yarp::sig::So
             }
         }
     }
-
-    yarp::dev::ReturnValue::return_code::return_value_ok;
+    yCDebug(GOOGLESPEECHTRANSCR) << "Transcription:" << transcription << "Score:" << score;
+    return yarp::dev::ReturnValue::return_code::return_value_ok;
 }
