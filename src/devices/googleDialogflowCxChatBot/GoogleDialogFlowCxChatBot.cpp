@@ -99,7 +99,7 @@ bool GoogleDialogFlowCxChatBot::close()
     return true;
 }
 
-bool GoogleDialogFlowCxChatBot::interact(const std::string& messageIn, std::string& messageOut)
+yarp::dev::ReturnValue GoogleDialogFlowCxChatBot::interact(const std::string& messageIn, std::string& messageOut)
 {
     dialogFlow_cx_v3::DetectIntentRequest req;
 
@@ -130,43 +130,43 @@ bool GoogleDialogFlowCxChatBot::interact(const std::string& messageIn, std::stri
             {
                 yCDebug(GOOGLEDIALOGFLOWCXBOT) << "An empty fulfillment was returned. Check the chatbot structure for safety";
                 messageOut = "";
-                return true;
+                return ReturnValue_ok;
             }
             messageOut = query_result.response_messages().Get(0).text().text().Get(0);
         } else {
             yCError(GOOGLEDIALOGFLOWCXBOT) << "No query result in the response.";
 
-            return false;
+            return yarp::dev::ReturnValue::return_code::return_value_error_generic;
         }
     } else {
         yCError(GOOGLEDIALOGFLOWCXBOT) << "Failed to detect intent. Error: " << status.error_message();
-        return false;
+        return yarp::dev::ReturnValue::return_code::return_value_error_generic;
     }
 
-    return true;
+    return ReturnValue_ok;
 }
 
-bool GoogleDialogFlowCxChatBot::setLanguage(const std::string& language)
+yarp::dev::ReturnValue GoogleDialogFlowCxChatBot::setLanguage(const std::string& language)
 {
     m_language_code = language;
-    return true;
+    return ReturnValue_ok;
 }
 
-bool GoogleDialogFlowCxChatBot::getLanguage(std::string& language)
+yarp::dev::ReturnValue GoogleDialogFlowCxChatBot::getLanguage(std::string& language)
 {
     language = m_language_code;
-    return true;
+    return ReturnValue_ok;
 }
 
-bool GoogleDialogFlowCxChatBot::getStatus(std::string& status)
+yarp::dev::ReturnValue GoogleDialogFlowCxChatBot::getStatus(std::string& status)
 {
     status = m_currentPage;
 
-    return true;
+    return ReturnValue_ok;
 }
 
-bool GoogleDialogFlowCxChatBot::resetBot()
+yarp::dev::ReturnValue GoogleDialogFlowCxChatBot::resetBot()
 {
     m_sessionId = m_agentId + "/sessions/" + _getRandSession_();
-    return true;
+    return ReturnValue_ok;
 }
