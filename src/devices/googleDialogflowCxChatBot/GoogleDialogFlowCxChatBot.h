@@ -1,4 +1,4 @@
-/*
+2/*
  * SPDX-FileCopyrightText: 2023 Istituto Italiano di Tecnologia (IIT)
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -49,11 +49,11 @@ public:
     bool close() override;
 
     // IChatBot
-    bool interact(const std::string& messageIn, std::string& messageOut) override;
-    bool setLanguage(const std::string& language) override;
-    bool getLanguage(std::string& language) override;
-    bool getStatus(std::string& status) override;
-    bool resetBot() override;
+    yarp::dev::ReturnValue interact(const std::string& messageIn, std::string& messageOut) override;
+    yarp::dev::ReturnValue setLanguage(const std::string& language) override;
+    yarp::dev::ReturnValue getLanguage(std::string& language) override;
+    yarp::dev::ReturnValue getStatus(std::string& status) override;
+    yarp::dev::ReturnValue resetBot() override;
 
 private:
     std::string m_agentId;
