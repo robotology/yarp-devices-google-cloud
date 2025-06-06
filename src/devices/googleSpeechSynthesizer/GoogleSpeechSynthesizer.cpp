@@ -212,6 +212,7 @@ yarp::dev::ReturnValue GoogleSpeechSynthesizer::getPitch(double& pitch)
 yarp::dev::ReturnValue GoogleSpeechSynthesizer::synthesize(const std::string& text, yarp::sig::Sound& sound)
 {
     m_synthInput->set_text(text);
+    yCDebug(GOOGLESPEECHSYNTH) << "Synthesizing text:" << text;
     google::cloud::StatusOr<google::cloud::texttospeech::v1::SynthesizeSpeechResponse> response = m_synthClient->SynthesizeSpeech(*m_synthInput,*m_synthVoiceSelParams,*m_synthAudioConfig);
     if (!response) {
         yCError(GOOGLESPEECHSYNTH) << "Error synthesizing speech. Google status:\n\t" << response.status().message() << "\n";
@@ -224,6 +225,8 @@ yarp::dev::ReturnValue GoogleSpeechSynthesizer::synthesize(const std::string& te
         yCError(GOOGLESPEECHSYNTH) << "Error while transfering data from google response to yarp::sigSound sound object";
         return yarp::dev::ReturnValue::return_code::return_value_error_generic;
     }
+    yCDebug(GOOGLESPEECHSYNTH) << "Synthesized sound channels:" << sound.getChannels() << "channels";
+    yCDebug(GOOGLESPEECHSYNTH) << "Synthesized sound length:" << sound.getSamples() << "samples";
 
     return yarp::dev::ReturnValue::return_code::return_value_ok;
 }
