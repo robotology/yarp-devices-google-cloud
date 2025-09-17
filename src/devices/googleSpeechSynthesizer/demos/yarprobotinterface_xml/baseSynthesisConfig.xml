@@ -13,7 +13,10 @@
                 it-IT
             </param>
             <param name="voice_name">
-                it-IT-Standard-B
+                it-IT-Standard-E
+            </param>
+            <param name="default_voices">
+                (it-IT-Standard-E en-US-Standard-C)
             </param>
         </device>
         <device name="synthWrap" type="speechSynthesizer_nws_yarp">
