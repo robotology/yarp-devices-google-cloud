@@ -11,6 +11,8 @@
 #include <yarp/sig/Sound.h>
 #include <yarp/os/Network.h>
 #include <algorithm>
+#include <vector>
+#include <map>
 
 #include "google/cloud/texttospeech/v1/text_to_speech_client.h"
 #include "google/protobuf/repeated_ptr_field.h"
@@ -69,6 +71,7 @@ public:
 
 private:
     bool m_offline{false};
+    std::map<std::string, std::string> m_defaultVoicesMap; // map<language_code, default_voice_name>
     std::shared_ptr<google::cloud::texttospeech_v1::TextToSpeechClient>        m_synthClient{nullptr};
     std::shared_ptr<google::cloud::texttospeech::v1::SynthesisInput>           m_synthInput{nullptr};
     std::shared_ptr<google::cloud::texttospeech::v1::VoiceSelectionParams>     m_synthVoiceSelParams{nullptr};

@@ -61,12 +61,42 @@ bool GoogleSpeechSynthesizer::open(yarp::os::Searchable &config)
         m_offline = config.find("__offline").asInt32() == 1;
     }
 
-    parseParams(config);
+    if (!parseParams(config))
+    {
+        yCError(GOOGLESPEECHSYNTH) << "Failed to parse parameters";
+        return false;
+    }
 
     m_synthClient = std::make_shared<texttospeech::TextToSpeechClient>(texttospeech::MakeTextToSpeechConnection());
     m_synthVoiceSelParams = std::make_shared<google::cloud::texttospeech::v1::VoiceSelectionParams>();
     m_synthInput = std::make_shared<google::cloud::texttospeech::v1::SynthesisInput>();
     m_synthAudioConfig = std::make_shared<google::cloud::texttospeech::v1::AudioConfig>();
+
+    // Populate default voices map
+    for(const auto& voice : m_default_voices)
+    {
+        std::string lang_code;
+        size_t first_dash = voice.find('-');
+        if (first_dash == std::string::npos) {
+            // No dash found: fallback to using the whole name
+            lang_code = voice;
+        } else {
+            size_t second_dash = voice.find('-', first_dash + 1);
+            if (second_dash == std::string::npos) {
+                // Only one dash: language code is the part before it
+                lang_code = voice.substr(0, first_dash);
+            } else {
+                // Two or more dashes: language code is up to the second dash
+                lang_code = voice.substr(0, second_dash);
+            }
+        }
+        if(m_defaultVoicesMap.find(lang_code) != m_defaultVoicesMap.end())
+        {
+            yCWarning(GOOGLESPEECHSYNTH) << "The default voice for language code" << lang_code << "was already set to" << m_defaultVoicesMap[lang_code] << ". Overriding it with the new value:" << voice;
+            continue;
+        }
+        m_defaultVoicesMap[lang_code] = voice;
+    }
 
     if(!setLanguage(m_language_code) && !m_offline)
     {
@@ -118,6 +148,7 @@ yarp::dev::ReturnValue GoogleSpeechSynthesizer::setLanguage(const std::string& l
         yCWarning(GOOGLESPEECHSYNTH) << "The language code is already set to:" << language;
         return yarp::dev::ReturnValue::return_code::return_value_error_generic;
     }
+    std::string start_voice;
     google::cloud::StatusOr<google::cloud::texttospeech::v1::ListVoicesResponse> response = m_synthClient->ListVoices(language);
     if (!response) {
         yCError(GOOGLESPEECHSYNTH) << "Error in getting the list of available voices. Google status:\n\t" << response.status().message() << "\n";
@@ -125,8 +156,18 @@ yarp::dev::ReturnValue GoogleSpeechSynthesizer::setLanguage(const std::string& l
     }
     m_synthVoices = response->voices();
     m_synthVoiceSelParams->set_language_code(language);
+    if(m_defaultVoicesMap.find(language) == m_defaultVoicesMap.end())
+    {
+        yCInfo(GOOGLESPEECHSYNTH) << "The provided language code is not supported. Setting the voice name to the first available voice for the selected language code:" << m_synthVoices[0].name();
+        start_voice = m_synthVoices[0].name();
+    }
+    else
+    {
+        yCInfo(GOOGLESPEECHSYNTH) << "Setting the voice name to the default voice for the selected language code:" << m_defaultVoicesMap[language];
+        start_voice = m_defaultVoicesMap[language];
+    }
 
-    setVoice(m_synthVoices[0].name());
+    setVoice(start_voice);
 
     return yarp::dev::ReturnValue::return_code::return_value_ok;
 }
