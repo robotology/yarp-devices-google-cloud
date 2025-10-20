@@ -54,6 +54,11 @@ bool GoogleSpeechSynthesizer::_voiceSupported(const std::string& voice_name)
     return false;
 }
 
+std::shared_ptr<google::cloud::texttospeech_v1::TextToSpeechClient> GoogleSpeechSynthesizer::_getClient(google::cloud::Options opts)
+{
+    return std::make_shared<texttospeech::TextToSpeechClient>(texttospeech::MakeTextToSpeechConnection(opts));
+}
+
 bool GoogleSpeechSynthesizer::open(yarp::os::Searchable &config)
 {
     if(config.check("__offline"))
@@ -67,7 +72,7 @@ bool GoogleSpeechSynthesizer::open(yarp::os::Searchable &config)
         return false;
     }
 
-    m_synthClient = std::make_shared<texttospeech::TextToSpeechClient>(texttospeech::MakeTextToSpeechConnection());
+    // m_synthClient = std::make_shared<texttospeech::TextToSpeechClient>(texttospeech::MakeTextToSpeechConnection());
     m_synthVoiceSelParams = std::make_shared<google::cloud::texttospeech::v1::VoiceSelectionParams>();
     m_synthInput = std::make_shared<google::cloud::texttospeech::v1::SynthesisInput>();
     m_synthAudioConfig = std::make_shared<google::cloud::texttospeech::v1::AudioConfig>();
@@ -149,7 +154,20 @@ yarp::dev::ReturnValue GoogleSpeechSynthesizer::setLanguage(const std::string& l
         return yarp::dev::ReturnValue::return_code::return_value_error_generic;
     }
     std::string start_voice;
-    google::cloud::StatusOr<google::cloud::texttospeech::v1::ListVoicesResponse> response = m_synthClient->ListVoices(language);
+
+    // Configure client with timeout options
+    google::cloud::Options opts;
+    // Connection timeout (initial connection establishment)
+    // This is what you want to be short for detecting no internet
+    opts.set<google::cloud::GrpcChannelArgumentsOption>({
+        {"grpc.initial_reconnect_backoff_ms", "1000"},      // 1 second
+        {"grpc.min_reconnect_backoff_ms", "1000"},
+        {"grpc.max_reconnect_backoff_ms", "5000"},          // 5 seconds max
+        {"grpc.http2.min_ping_interval_without_data_ms", "30000"},
+        {"grpc.keepalive_timeout_ms", "10000"},             // 10 seconds
+    });
+
+    google::cloud::StatusOr<google::cloud::texttospeech::v1::ListVoicesResponse> response = _getClient(opts)->ListVoices(language);
     if (!response) {
         yCError(GOOGLESPEECHSYNTH) << "Error in getting the list of available voices. Google status:\n\t" << response.status().message() << "\n";
         return yarp::dev::ReturnValue::return_code::return_value_error_generic;
@@ -254,7 +272,20 @@ yarp::dev::ReturnValue GoogleSpeechSynthesizer::synthesize(const std::string& te
 {
     m_synthInput->set_text(text);
     yCDebug(GOOGLESPEECHSYNTH) << "Synthesizing text:" << text;
-    google::cloud::StatusOr<google::cloud::texttospeech::v1::SynthesizeSpeechResponse> response = m_synthClient->SynthesizeSpeech(*m_synthInput,*m_synthVoiceSelParams,*m_synthAudioConfig);
+
+    // Configure client with timeout options
+    google::cloud::Options opts;
+    // Connection timeout (initial connection establishment)
+    // This is what you want to be short for detecting no internet
+    opts.set<google::cloud::GrpcChannelArgumentsOption>({
+        {"grpc.initial_reconnect_backoff_ms", "1000"},      // 1 second
+        {"grpc.min_reconnect_backoff_ms", "1000"},
+        {"grpc.max_reconnect_backoff_ms", "5000"},          // 5 seconds max
+        {"grpc.http2.min_ping_interval_without_data_ms", "30000"},
+        {"grpc.keepalive_timeout_ms", "10000"},             // 10 seconds
+    });
+
+    google::cloud::StatusOr<google::cloud::texttospeech::v1::SynthesizeSpeechResponse> response = _getClient(opts)->SynthesizeSpeech(*m_synthInput,*m_synthVoiceSelParams,*m_synthAudioConfig);
     if (!response) {
         yCError(GOOGLESPEECHSYNTH) << "Error synthesizing speech. Google status:\n\t" << response.status().message() << "\n";
         return yarp::dev::ReturnValue::return_code::return_value_error_generic;

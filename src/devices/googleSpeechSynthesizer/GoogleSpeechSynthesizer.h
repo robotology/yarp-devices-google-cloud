@@ -16,6 +16,8 @@
 
 #include "google/cloud/texttospeech/v1/text_to_speech_client.h"
 #include "google/protobuf/repeated_ptr_field.h"
+#include "google/cloud/options.h"
+#include "google/cloud/grpc_options.h"
 
 #include "GoogleSpeechSynthesizer_ParamsParser.h"
 
@@ -70,6 +72,9 @@ public:
     yarp::dev::ReturnValue synthesize(const std::string& text, yarp::sig::Sound& sound) override;
 
 private:
+
+    std::shared_ptr<google::cloud::texttospeech_v1::TextToSpeechClient> _getClient(google::cloud::Options opts);
+
     bool m_offline{false};
     std::map<std::string, std::string> m_defaultVoicesMap; // map<language_code, default_voice_name>
     std::shared_ptr<google::cloud::texttospeech_v1::TextToSpeechClient>        m_synthClient{nullptr};
