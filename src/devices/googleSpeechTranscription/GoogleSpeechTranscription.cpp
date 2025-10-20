@@ -29,6 +29,11 @@ GoogleSpeechTranscription::GoogleSpeechTranscription()
 
 }
 
+std::shared_ptr<google::cloud::speech_v1::SpeechClient> GoogleSpeechTranscription::_getClient(google::cloud::Options opts)
+{
+    return std::make_shared<google::cloud::speech_v1::SpeechClient>(google::cloud::speech_v1::MakeSpeechConnection(opts));
+}
+
 bool GoogleSpeechTranscription::open(yarp::os::Searchable &config)
 {
     if(config.check("__offline"))
@@ -43,7 +48,6 @@ bool GoogleSpeechTranscription::open(yarp::os::Searchable &config)
     m_audioConfig.set_language_code(m_language_code);
     m_audioConfig.set_encoding(google::cloud::speech::v1::RecognitionConfig::LINEAR16);
     m_audioConfig.set_sample_rate_hertz(m_sample_rate_hertz);
-    m_client = std::make_shared<google::cloud::speech_v1::SpeechClient>(google::cloud::speech_v1::MakeSpeechConnection());
 
     return true;
 }
@@ -90,7 +94,19 @@ yarp::dev::ReturnValue GoogleSpeechTranscription::transcribe(const yarp::sig::So
     auto rawData = std::vector<short>(rawData_tmp.begin(), rawData_tmp.end());
     audio.set_content((char*)rawData.data(),rawData.size()*2);
 
-    auto response = m_client->Recognize(m_audioConfig,audio);
+    // Configure client with timeout options
+    google::cloud::Options opts;
+    // Connection timeout (initial connection establishment)
+    // This is what you want to be short for detecting no internet
+    opts.set<google::cloud::GrpcChannelArgumentsOption>({
+        {"grpc.initial_reconnect_backoff_ms", "1000"},      // 1 second
+        {"grpc.min_reconnect_backoff_ms", "1000"},
+        {"grpc.max_reconnect_backoff_ms", "5000"},          // 5 seconds max
+        {"grpc.http2.min_ping_interval_without_data_ms", "30000"},
+        {"grpc.keepalive_timeout_ms", "10000"},             // 10 seconds
+    });
+
+    auto response = _getClient(opts)->Recognize(m_audioConfig,audio);
 
     if(!response)
     {

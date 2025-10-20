@@ -16,6 +16,7 @@
 
 #include "google/cloud/speech/v1/speech_client.h"
 #include "google/protobuf/repeated_ptr_field.h"
+#include "google/cloud/grpc_options.h"
 
 #include "GoogleSpeechTranscription_ParamsParser.h"
 
@@ -54,9 +55,11 @@ public:
     yarp::dev::ReturnValue transcribe(const yarp::sig::Sound& sound, std::string& transcription, double& score) override;
 
 private:
+
+    std::shared_ptr<google::cloud::speech_v1::SpeechClient> _getClient(google::cloud::Options opts);
+
     bool         m_offline{false};
     google::cloud::speech::v1::RecognitionConfig             m_audioConfig;
-    std::shared_ptr<google::cloud::speech_v1::SpeechClient>  m_client{nullptr};
 };
 
 #endif // YARP_GOOGLESPEECHTRANSCR_H
