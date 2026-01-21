@@ -225,7 +225,7 @@ yarp::dev::ReturnValue GoogleSpeechSynthesizer::setVoice(const std::string& voic
 
     if(!_voiceSupported(voice_name))
     {
-        yCInfo(GOOGLESPEECHSYNTH) << "Unsupported voice name:" << voice_name;\
+        yCInfo(GOOGLESPEECHSYNTH) << "Unsupported voice name:" << voice_name;
         if(m_voice_fallback)
         {
             yCInfo(GOOGLESPEECHSYNTH) << "Setting the voice name to the first available one for the selected language code:" << m_synthVoices[0].name();
