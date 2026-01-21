@@ -59,6 +59,30 @@ std::shared_ptr<google::cloud::texttospeech_v1::TextToSpeechClient> GoogleSpeech
     return std::make_shared<texttospeech::TextToSpeechClient>(texttospeech::MakeTextToSpeechConnection(opts));
 }
 
+ yarp::dev::ReturnValue GoogleSpeechSynthesizer::_getVoicesList(std::string language_code, google::protobuf::RepeatedPtrField<google::cloud::texttospeech::v1::Voice>& voices_list)
+{
+    // Configure client with timeout options
+    google::cloud::Options opts;
+    // Connection timeout (initial connection establishment)
+    // This is what you want to be short for detecting no internet
+    opts.set<google::cloud::GrpcChannelArgumentsOption>({
+        {"grpc.initial_reconnect_backoff_ms", "1000"},      // 1 second
+        {"grpc.min_reconnect_backoff_ms", "1000"},
+        {"grpc.max_reconnect_backoff_ms", "5000"},          // 5 seconds max
+        {"grpc.http2.min_ping_interval_without_data_ms", "30000"},
+        {"grpc.keepalive_timeout_ms", "10000"},             // 10 seconds
+    });
+
+    google::cloud::StatusOr<google::cloud::texttospeech::v1::ListVoicesResponse> response = _getClient(opts)->ListVoices(language_code);
+    if (!response) {
+        yCError(GOOGLESPEECHSYNTH) << "Error in getting the list of available voices. Google status:\n\t" << response.status().message() << "\n";
+        return yarp::dev::ReturnValue::return_code::return_value_error_generic;
+    }
+
+    voices_list = response->voices();
+    return yarp::dev::ReturnValue::return_code::return_value_ok;
+}
+
 bool GoogleSpeechSynthesizer::open(yarp::os::Searchable &config)
 {
     if(config.check("__offline"))
@@ -155,24 +179,11 @@ yarp::dev::ReturnValue GoogleSpeechSynthesizer::setLanguage(const std::string& l
     }
     std::string start_voice;
 
-    // Configure client with timeout options
-    google::cloud::Options opts;
-    // Connection timeout (initial connection establishment)
-    // This is what you want to be short for detecting no internet
-    opts.set<google::cloud::GrpcChannelArgumentsOption>({
-        {"grpc.initial_reconnect_backoff_ms", "1000"},      // 1 second
-        {"grpc.min_reconnect_backoff_ms", "1000"},
-        {"grpc.max_reconnect_backoff_ms", "5000"},          // 5 seconds max
-        {"grpc.http2.min_ping_interval_without_data_ms", "30000"},
-        {"grpc.keepalive_timeout_ms", "10000"},             // 10 seconds
-    });
-
-    google::cloud::StatusOr<google::cloud::texttospeech::v1::ListVoicesResponse> response = _getClient(opts)->ListVoices(language);
-    if (!response) {
-        yCError(GOOGLESPEECHSYNTH) << "Error in getting the list of available voices. Google status:\n\t" << response.status().message() << "\n";
+    if(!_getVoicesList(language, m_synthVoices))
+    {
+        yCError(GOOGLESPEECHSYNTH) << "Error while getting the list of available voices for language code:" << language;
         return yarp::dev::ReturnValue::return_code::return_value_error_generic;
     }
-    m_synthVoices = response->voices();
     m_synthVoiceSelParams->set_language_code(language);
     if(m_defaultVoicesMap.find(language) == m_defaultVoicesMap.end())
     {
@@ -185,9 +196,8 @@ yarp::dev::ReturnValue GoogleSpeechSynthesizer::setLanguage(const std::string& l
         start_voice = m_defaultVoicesMap[language];
     }
 
-    setVoice(start_voice);
+    return setVoice(start_voice);
 
-    return yarp::dev::ReturnValue::return_code::return_value_ok;
 }
 
 yarp::dev::ReturnValue GoogleSpeechSynthesizer::getLanguage(std::string& language)
@@ -215,6 +225,13 @@ yarp::dev::ReturnValue GoogleSpeechSynthesizer::setVoice(const std::string& voic
 
     if(!_voiceSupported(voice_name))
     {
+        yCInfo(GOOGLESPEECHSYNTH) << "Unsupported voice name:" << voice_name;\
+        if(m_voice_fallback)
+        {
+            yCInfo(GOOGLESPEECHSYNTH) << "Setting the voice name to the first available one for the selected language code:" << m_synthVoices[0].name();
+            m_synthVoiceSelParams->set_name(m_synthVoices[0].name());
+            return yarp::dev::ReturnValue::return_code::return_value_ok;
+        }
         return yarp::dev::ReturnValue::return_code::return_value_error_generic;
     }
 
