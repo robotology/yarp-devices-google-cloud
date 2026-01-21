@@ -8,7 +8,7 @@
 // This is an automatically generated file. Please do not edit it.
 // It will be re-generated if the cmake flag ALLOW_DEVICE_PARAM_PARSER_GERNERATION is ON.
 
-// Generated on: Wed Sep 17 14:39:55 2025
+// Generated on: Wed Jan 21 10:47:25 2026
 
 
 #include "GoogleSpeechSynthesizer_ParamsParser.h"
@@ -33,6 +33,7 @@ std::vector<std::string> GoogleSpeechSynthesizer_ParamsParser::getListOfParams()
     params.push_back("voice_speed");
     params.push_back("voice_pitch");
     params.push_back("default_voices");
+    params.push_back("voice_fallback");
     return params;
 }
 
@@ -62,6 +63,11 @@ bool GoogleSpeechSynthesizer_ParamsParser::getParamValue(const std::string& para
     if (paramName =="default_voices")
     {
         return false;
+    }
+    if (paramName =="voice_fallback")
+    {
+        paramValue = std::to_string(m_voice_fallback);
+        return true;
     }
 
     yError() <<"parameter '" << paramName << "' was not found";
@@ -177,6 +183,20 @@ bool      GoogleSpeechSynthesizer_ParamsParser::parseParams(const yarp::os::Sear
         prop_check.unput("default_voices");
     }
 
+    //Parser of parameter voice_fallback
+    {
+        if (config.check("voice_fallback"))
+        {
+            m_voice_fallback = config.find("voice_fallback").asInt64();
+            yCInfo(GoogleSpeechSynthesizerParamsCOMPONENT) << "Parameter 'voice_fallback' using value:" << m_voice_fallback;
+        }
+        else
+        {
+            yCInfo(GoogleSpeechSynthesizerParamsCOMPONENT) << "Parameter 'voice_fallback' using DEFAULT value:" << m_voice_fallback;
+        }
+        prop_check.unput("voice_fallback");
+    }
+
     /*
     //This code check if the user set some parameter which are not check by the parser
     //If the parser is set in strict mode, this will generate an error
@@ -218,9 +238,10 @@ std::string      GoogleSpeechSynthesizer_ParamsParser::getDocumentationOfDeviceP
     doc = doc + std::string("'voice_speed': Speaking rate/speed, in the range [0.25, 4.0]. 1.0 is the normal native speed supported by the specific voice. 2.0 is twice as fast, and 0.5 is half as fast.\n");
     doc = doc + std::string("'voice_pitch': Speaking pitch, in the range [-20.0, 20.0]. 20 means increase 20 semitones from the original pitch. -20 means decrease 20 semitones from the original pitch.\n");
     doc = doc + std::string("'default_voices': A set of default voices to be automatically set when you change language. (This page holds the complete list of the available voices: https://cloud.google.com/text-to-speech/docs/voices)\n");
+    doc = doc + std::string("'voice_fallback': It enables/disables the automatic setting of the voice name to the first available one if the selected voice is not valid\n");
     doc = doc + std::string("\n");
     doc = doc + std::string("Here are some examples of invocation command with yarpdev, with all params:\n");
-    doc = doc + " yarpdev --device googleSpeechSynthesizer --language_code <mandatory_value> --voice_name <optional_value> --voice_speed 1 --voice_pitch 0 --default_voices <optional_value>\n";
+    doc = doc + " yarpdev --device googleSpeechSynthesizer --language_code <mandatory_value> --voice_name <optional_value> --voice_speed 1 --voice_pitch 0 --default_voices <optional_value> --voice_fallback 1\n";
     doc = doc + std::string("Using only mandatory params:\n");
     doc = doc + " yarpdev --device googleSpeechSynthesizer --language_code <mandatory_value>\n";
     doc = doc + std::string("=============================================\n\n");    return doc;
