@@ -74,6 +74,7 @@ public:
 private:
 
     std::shared_ptr<google::cloud::texttospeech_v1::TextToSpeechClient> _getClient(google::cloud::Options opts);
+    yarp::dev::ReturnValue _getVoicesList(std::string language_code, google::protobuf::RepeatedPtrField<google::cloud::texttospeech::v1::Voice>& voices_list);
 
     bool m_offline{false};
     std::map<std::string, std::string> m_defaultVoicesMap; // map<language_code, default_voice_name>
