@@ -247,6 +247,17 @@ yarp::dev::ReturnValue GoogleSpeechSynthesizer::getVoice(std::string& voice_name
     return yarp::dev::ReturnValue::return_code::return_value_ok;
 }
 
+yarp::dev::ReturnValue GoogleSpeechSynthesizer::getAvailableVoices(yarp::sig::VectorOfString& voices_list)
+{
+    voices_list.clear();
+    for(const auto& voice : m_synthVoices)
+    {
+        voices_list.push_back(voice.name());
+    }
+
+    return yarp::dev::ReturnValue::return_code::return_value_ok;
+}
+
 yarp::dev::ReturnValue GoogleSpeechSynthesizer::setSpeed(const double speed)
 {
     m_synthAudioConfig->set_speaking_rate(speed);
